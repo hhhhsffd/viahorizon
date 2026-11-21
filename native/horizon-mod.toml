@@ -1,0 +1,59 @@
+id = "viahorizon"
+name = "ViaHorizon"
+version = "0.9.0-dev"
+description = "Connect Horizon to older Minecraft Release servers."
+authors = ["hhhhsffd"]
+license = "GPL-3.0-or-later"
+api = "0.2"
+side = "client"
+capabilities = ["registries"]
+
+[native]
+game = "26.3"
+horizon = "0a875da91dbb0fdcb7ba8c42c11341aa229af51a"
+mixins = "e59da9094f0c2fdda6c627fe9eff22dec6a906f0"
+
+[[native.module]]
+id = "runtime"
+file = "crates/horizon-client/src/lib.rs"
+name = "viahorizon_runtime"
+source = "src/runtime.rs"
+visibility = "pub"
+
+[[native.module]]
+id = "item_support"
+file = "crates/horizon-client/src/game/network/remote/mod.rs"
+name = "vfp_item_support"
+source = "src/item_support.rs"
+
+[[native.mixin]]
+id = "connection"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::game::remote::Game<'_>::connect_remote_session"
+helper = "src/connect.rs"
+bindings = [
+    { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+    { name = "address", ty = "&str", value = "address" },
+    { name = "name", ty = "&str", value = "name" },
+    { name = "local", ty = "&Option<horizon_protocol::connection::Pipe>", value = "&local" },
+    { name = "cookies", ty = "&Option<horizon_client::net::Cookies>", value = "&cookies" },
+    { name = "lan", ty = "bool", value = "lan" },
+    { name = "realm", ty = "bool", value = "realm" },
+]
+
+[[native.mixin]]
+id = "legacy_sword_pose"
+kind = "WRAP_OPERATION"
+target = "horizon_client::game::frame_geometry::Game<'_>::hand_geometry"
+selector = "horizon_client::first_person::item_pose"
+helper = "src/legacy_sword_pose.rs"
+ordinal = 0
+require = 1
+bindings = [
+    { name = "left", ty = "bool", value = "$arg0" },
+    { name = "inverse_height", ty = "f32", value = "$arg1" },
+    { name = "attack", ty = "f32", value = "$arg2" },
+    { name = "pose", ty = "crate::viahorizon_runtime::HandPose", value = "$arg3" },
+    { name = "original", ty = "impl FnOnce(bool, f32, f32, crate::viahorizon_runtime::HandPose) -> glam::Mat4", value = "$operation" },
+]

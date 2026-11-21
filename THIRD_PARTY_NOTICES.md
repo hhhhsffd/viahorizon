@@ -1,5 +1,11 @@
 # Third-party notices
 
+- [Horizon](https://github.com/horizon-rust/horizon), LGPL-3.0-or-later at
+  `0a875da91dbb0fdcb7ba8c42c11341aa229af51a`. The native SDK package adapts the
+  metadata readers from `crates/horizon-protocol/src/entity_data.rs` for use
+  with canonical 26.3 data, without the game's older-release ID remapping.
+  The package includes Horizon's licence as `LICENSE-Horizon-LGPL-3.0.txt`.
+
 - [ViaLegacy](https://github.com/ViaVersion/ViaLegacy), copyright 2020–2026
   RK_01/RaphiMC and contributors, GPL-3.0-or-later. The 0.8 source extension
   derives Release 1.7.2/1.7.6 packet tables, login encodings, compressed chunk

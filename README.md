@@ -1,36 +1,32 @@
 # ViaHorizon
 
 Choose the Minecraft server version when playing with Horizon 26.3.
-Supports Release servers from 1.7.2 through 26.3.
+ViaHorizon translates Release protocols from 1.7.2 through 26.3.
 
 ## Install
 
-Download `viahorizon-0.8.8-dev.hnmod` from
-[Releases](https://github.com/hhhhsffd/viahorizon/releases).
-Requires Horizon Launcher with native-build support, prepared 26.3 resources,
-Python 3.11+, Rust 1.95+ and a C toolchain.
+Download `viahorizon-0.9.0-dev.hmod` from
+[Releases](https://github.com/hhhhsffd/viahorizon/releases). It is built for
+the **November 20, 2026 Nightly (`0a875da`)**. Install and prepare that Nightly
+in Horizon Launcher first. The launcher supplies the native build tools.
 
 ```powershell
-python -m zipfile -e .\viahorizon-0.8.8-dev.hnmod .\viahorizon-0.8.8-dev
-horizon-launcher native-build .\viahorizon-0.8.8-dev --trust-native-code
+python -m zipfile -e .\viahorizon-0.9.0-dev.hmod .\viahorizon-0.9.0-dev
+horizon-launcher native-build .\viahorizon-0.9.0-dev --version nightly-2026-11-20-0a875da --trust-native-code
 ```
+
+Native mods run with your account's permissions. Choose the server version
+under **Options → Mods → ViaHorizon → Config**. Leave it on **Use config.json**
+to use existing settings or auto detection on a fresh install.
 
 ## Build
 
-Use Python 3.11+, Git, Rust 1.99.1 and a C toolchain. Clone Horizon and
-horizon-mixins at the commits in [compatibility.json](compatibility.json),
-then build horizon-mixins with `cargo build --locked` in its checkout.
-On Linux, install `libasound2-dev`, `libudev-dev` and `pkg-config` first.
+See the [native SDK build and validation guide](docs/publishing/NATIVE-SDK.md).
+Run `cargo test --locked` to exercise the shared protocol code. For the old
+`.hnmod` workflow, see the [0.8 publishing guide](docs/publishing/README.md).
 
-```powershell
-cargo test --locked
-python tools/native.py check --horizon PATH_TO_HORIZON --mixins PATH_TO_MIXINS_EXE
-python tools/native.py build --horizon PATH_TO_HORIZON --mixins PATH_TO_MIXINS_EXE
-python tools/native.py package
-```
-
-The package and checksum are written to `dist/`. See the
-[publishing guide](docs/publishing/README.md) for release checks and uploads.
+This is an exact-build native mod. A newer Horizon Nightly can change the
+functions it targets and may require a new release of ViaHorizon.
 
 ## License
 

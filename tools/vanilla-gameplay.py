@@ -283,10 +283,10 @@ def main():
         handle=(run/name).open('wb');log_handles.append(handle);return handle
     def console(command):
         server.stdin.write((command+'\n').encode('utf-8'));server.stdin.flush()
-    def ctl(*command):
-        result=subprocess.run([str(args.ctl),'--socket',str(run/'ctl.sock'),'--timeout','10',*command],
+    def ctl(*command, timeout=10):
+        result=subprocess.run([str(args.ctl),'--socket',str(run/'ctl.sock'),'--timeout',str(timeout),*command],
                               cwd=game,env=env,capture_output=True,text=True,encoding='utf-8',
-                              timeout=15,creationflags=HIDDEN)
+                              timeout=timeout+5,creationflags=HIDDEN)
         if result.returncode:
             raise RuntimeError('ctl '+repr(command)+': '+(result.stderr or result.stdout))
         return json.loads(result.stdout)
@@ -384,6 +384,25 @@ def main():
                 with executable.open('rb') as binary:
                     assert hashlib.file_digest(binary,'sha256').hexdigest()==record['sha256'],executable
             report['probe_base_bundle_sha256']=digest.hexdigest()
+        elif (args.client.parent/'native-mods.json').is_file():
+            receipt = json.loads((args.client.parent/'native-mods.json').read_text(encoding='utf-8'))
+            mod = next((item for item in receipt['mods'] if item['id'] == 'viahorizon'), None)
+            if mod is None or receipt['route'] != 'prebuilt':
+                raise RuntimeError('Expected a launcher native build that includes ViaHorizon')
+            libraries = receipt['libraries']
+            if not any(item['kind'] == 'patch' for item in libraries):
+                raise RuntimeError('Launcher native build has no function replacement library')
+            for item in libraries:
+                binary = args.client.parent/item['file']
+                with binary.open('rb') as stream:
+                    if hashlib.file_digest(stream, 'sha256').hexdigest() != item['sha256']:
+                        raise RuntimeError('Library differs from launcher build receipt: '+str(binary))
+            report['production_bundle_sha256'] = mod['sha256']
+            report['horizon_revision'] = receipt['horizon']
+            if os.name == 'nt':
+                # A standalone copy of the native build ships its private DLLs
+                # beside the client. Keep them ahead of unrelated toolchains.
+                env['PATH'] = str(args.client.parent) + os.pathsep + env.get('PATH', '')
         else:
             receipt_path=args.client.parent/'build.json'
             if not receipt_path.is_file(): receipt_path=ROOT/'target/native-game-build.json'
@@ -422,7 +441,7 @@ def main():
                                  '--control-socket',str(run/'ctl.sock'),'--smoke-report',str(run/'game-report.json'),
                                  '--name','VfpSmoke','--width','1280','--height','720','--render-distance',str(distance),
                                  '--server',f'127.0.0.1:{connect_port}'],cwd=game,env=env,
-                                stdout=log('client-stdout.log'),stderr=log('client-stderr.log'),creationflags=HIDDEN)
+                                 stdin=subprocess.DEVNULL,stdout=log('client-stdout.log'),stderr=log('client-stderr.log'),creationflags=HIDDEN)
         processes.append(client)
         if origin_jar:
             deadline=time.monotonic()+args.timeout
@@ -443,9 +462,11 @@ def main():
         deadline=time.monotonic()+args.timeout
         while time.monotonic()<deadline:
             if client.poll() is not None:
-                raise RuntimeError('Rust client exited before world entry')
+                raise RuntimeError(f'Rust client exited before world entry (exit {client.returncode})')
             if (run/'ctl.sock').exists():
-                state=ctl('state')
+                # The socket exists before the renderer can answer its first
+                # request; shader/pipeline initialization can take >10 s.
+                state=ctl('state',timeout=max(1,min(60,int(deadline-time.monotonic()))))
                 (run/'latest-state.json').write_text(json.dumps(state,indent=2),encoding='utf-8')
                 if state.get('player') and state.get('screen')=='playing':
                     report['world_entry']=True

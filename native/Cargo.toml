@@ -1,0 +1,9 @@
+[package]
+name = "viahorizon-native"
+version = "0.9.0-dev"
+edition = "2024"
+license = "GPL-3.0-or-later"
+publish = false
+
+[dependencies]
+horizon-mod-api = { path = ".horizon/sdk/api/crates/horizon-mod-api" }

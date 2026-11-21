@@ -1,0 +1,58 @@
+{
+  "version": "0.9.0-dev",
+  "horizon": "0a875da91dbb0fdcb7ba8c42c11341aa229af51a",
+  "horizon_mixins": "e59da9094f0c2fdda6c627fe9eff22dec6a906f0",
+  "launcher": "0.2.94",
+  "platform": "x86_64-pc-windows-gnu",
+  "standalone_tests": 49,
+  "standalone_clippy": "passed with warnings denied",
+  "package": {
+    "file": "viahorizon-0.9.0-dev.hmod",
+    "sha256": "3feb4e65559c37aeaa37a4eb46de15416cdea7351bf161858e4f5b6c3ce5abed",
+    "size": 818624,
+    "checker": "passed",
+    "reproducible": true
+  },
+  "native_build": {
+    "route": "prebuilt",
+    "functions_patched": 19,
+    "mixins": 21,
+    "source_bundle_sha256": "76a054669a4103cfd1816eac73b4caaee86d17067d4e0a44b7b07bcd1070a6a7",
+    "source_files_match_package": true
+  },
+  "gameplay": {
+    "1.7.2": {
+      "selection": "explicit",
+      "world_entry": true,
+      "decode_errors": 0,
+      "checks": [
+        "player spawn",
+        "chunk meshing and native decoders",
+        "movement",
+        "boat mounting, riding and dismounting",
+        "chat",
+        "block placement and breaking",
+        "entity spawn and combat",
+        "death and respawn",
+        "Nether portal",
+        "reconnect",
+        "inventory clicks",
+        "crafting",
+        "container transfers"
+      ]
+    },
+    "1.19.2": {
+      "selection": "auto",
+      "world_entry": true,
+      "chunks_meshed": true,
+      "decode_errors": 0
+    },
+    "26.3": {
+      "selection": "auto",
+      "world_entry": true,
+      "chunks_meshed": true,
+      "decode_errors": 0
+    }
+  },
+  "authentication_scope": "Smoke tests use disposable local vanilla servers. Live Microsoft session-service authentication was not tested."
+}
